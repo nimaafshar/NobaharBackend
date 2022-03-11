@@ -1,6 +1,5 @@
-<<<<<<< HEAD
 from rest_framework import serializers
-from .models import Group
+from .models import Group,User
 
 
 class GroupReadCompactSerializer(serializers.ModelSerializer):
@@ -8,9 +7,6 @@ class GroupReadCompactSerializer(serializers.ModelSerializer):
         model = Group
         fields = ('id', 'name', 'description')
         read_only_fields = ('id', 'name', 'description')
-=======
-from rest_framework import serializers
-from .models import User
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -31,4 +27,3 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = '__all__'
->>>>>>> 89a532b9d9b67403509a4c3b05482947ca7a014c

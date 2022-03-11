@@ -13,6 +13,9 @@ class Group(models.Model):
     def __str__(self):
         return self.name
 
+    def __repr__(self):
+        return self.name
+
 
 # Create your models here.
 class User(AbstractUser):
