@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'account.apps.AccountConfig',
-    'rest_framework_simplejwt'
+    'rest_framework_simplejwt',
+    'chat.apps.ChatConfig'
 ]
 
 MIDDLEWARE = [
@@ -70,6 +71,10 @@ TEMPLATES = [
         },
     },
 ]
+
+AUTHENTICATION_BACKENDS = (
+    'account.backends.EmailBackend',
+)
 
 WSGI_APPLICATION = 'project.wsgi.application'
 
@@ -135,3 +140,5 @@ STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'account.User'
+
+# BAD_REQUEST_MESSAGE

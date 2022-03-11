@@ -16,12 +16,15 @@ class User(AbstractUser):
     """
     todo : use email as sign in key
     """
-
     email = models.EmailField(_('email address'), blank=False, null=False, unique=True)
     name = models.CharField(max_length=200, blank=False, null=False, unique=False)
     group = models.ForeignKey('account.Group', on_delete=models.PROTECT, related_name='members', null=True)
     joined_at = models.DateTimeField(null=True)  # joined to group
+
     # has_chat = models.ManyToManyField('account.User')
+
+    def __str__(self):
+        return self.email
 
 
 class JoinRequest(models.Model):
