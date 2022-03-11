@@ -1,12 +1,14 @@
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.permissions import IsAuthenticated
-from .serializers import GroupReadCompactSerializer, RegisterSerializer, GroupCreateSerializer
+from .serializers import GroupReadCompactSerializer, RegisterSerializer, GroupCreateSerializer, \
+    GroupReadDetailedSerializer
 from .models import Group
 from rest_framework import generics
 from rest_framework.response import Response
 from .jwt import CustomTokenObtainPairSerializer
-from rest_framework.mixins import CreateModelMixin
+from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin
 from .permissions import UserGroupPermissions
+from rest_framework.decorators import action
 from rest_framework import status
 
 
@@ -16,7 +18,8 @@ class GroupsViewSet(GenericViewSet):
     queryset = Group.objects.all()
     action_serializers = {
         'list': GroupReadCompactSerializer,
-        'create': GroupCreateSerializer
+        'create': GroupCreateSerializer,
+        'my_group': GroupReadDetailedSerializer
     }
 
     def get_serializer_class(self):
@@ -41,6 +44,12 @@ class GroupsViewSet(GenericViewSet):
         owner = self.request.user
         owner.group = instance
         owner.save()
+
+    @action(detail=False, url_path='my', url_name='my_group', methods=['GET'])
+    def my_group(self, request):
+        instance = request.user.group
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 
 class RegisterApi(generics.GenericAPIView):

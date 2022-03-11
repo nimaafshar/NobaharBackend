@@ -25,6 +25,33 @@ class GroupCreateSerializer(serializers.ModelSerializer):
         return Group.objects.create(**validated_data, admin=self.context['request'].user)
 
 
+class UserInGroupReadSerializer(serializers.ModelSerializer):
+    rule = serializers.SerializerMethodField(method_name='is_owner')
+
+    class Meta:
+        model = User
+        fields = ('id', 'name', 'email', 'rule')
+
+    def is_owner(self, instance):
+        if self.context['owner'].id == instance.id:
+            return "Owner"
+        else:
+            return "Member"
+
+
+class GroupReadDetailedSerializer(serializers.ModelSerializer):
+    members = serializers.SerializerMethodField(method_name='get_members')
+
+    class Meta:
+        model = Group
+        fields = ('name', 'description', 'members')
+        read_only_fields = ('name', 'description', 'members')
+
+    def get_members(self, instance):
+        serializer = UserInGroupReadSerializer(instance.members, context={'owner': instance.admin}, many=True)
+        return serializer.data
+
+
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
