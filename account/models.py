@@ -8,7 +8,10 @@ class Group(models.Model):
     admin = models.OneToOneField('account.User', on_delete=models.PROTECT, related_name='owned_group', null=False)
     name = models.CharField(max_length=300, blank=False, null=False)
     description = models.TextField(null=False, blank=True)
-    connected_to = models.ManyToManyField('account.Group')
+    connected_to = models.ManyToManyField('account.Group', blank=True)
+
+    def __str__(self):
+        return self.name
 
 
 # Create your models here.

@@ -1,4 +1,4 @@
-from rest_framework_simplejwt.serializers import TokenObtainSerializer, RefreshToken
+from rest_framework_simplejwt.serializers import TokenObtainSerializer, RefreshToken, TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from account.models import User
 from rest_framework.exceptions import AuthenticationFailed
@@ -22,7 +22,7 @@ class CustomTokenObtainPairSerializer(EmailTokenObtainSerializer):
 
         refresh = self.get_token(self.user)
 
-        data["token"] = str(refresh)
+        data["token"] = str(refresh.access_token)
         data["message"] = "successfull"
 
         return data
