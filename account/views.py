@@ -2,7 +2,7 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework.permissions import IsAuthenticated
 from .serializers import GroupReadCompactSerializer, RegisterSerializer, GroupCreateSerializer, \
     GroupReadDetailedSerializer, JoinRequestReadSerializer, JoinRequestCreateSerializer, AcceptRequestSerializer, \
-    ConnectionRequestCreateSerializer
+    ConnectionRequestCreateSerializer, ConnectionRequestReadSerializer
 from .models import Group, JoinRequest
 from rest_framework import generics
 from rest_framework.response import Response
@@ -111,10 +111,10 @@ class JoinRequestsViewSet(GenericViewSet, CreateModelMixin):
         return Response({"message": "successfull"}, status=status.HTTP_200_OK)
 
 
-class ConnectionRequestsViewSet(GenericViewSet, CreateModelMixin):
+class ConnectionRequestsViewSet(GenericViewSet):
     permission_classes = (IsAuthenticated, UserConnectionRequestPermissions)
     action_serializers = {
-        # 'list': JoinRequestReadSerializer,
+        'list': ConnectionRequestReadSerializer,
         # 'group_requests': JoinRequestReadSerializer,
         'create': ConnectionRequestCreateSerializer,
         # 'accept_request': AcceptRequestSerializer
@@ -125,6 +125,11 @@ class ConnectionRequestsViewSet(GenericViewSet, CreateModelMixin):
             return self.action_serializers.get(self.action)
         else:
             return None
+
+    def list(self, request, *args, **kwargs):
+        queryset = request.user.group.rec_con_reqs
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({'requests': serializer.data})
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data, context={'user': request.user})

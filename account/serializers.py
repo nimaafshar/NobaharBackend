@@ -147,3 +147,14 @@ class ConnectionRequestCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return ConnectionRequest.objects.create(**validated_data, from_group=self.context['user'].group)
+
+
+class ConnectionRequestReadSerializer(serializers.ModelSerializer):
+    connectionRequestId = serializers.IntegerField(source='id', read_only=True)
+    groupId = serializers.IntegerField(source='to_group_id', read_only=True)
+    sent = TimestampField()
+
+    class Meta:
+        model = ConnectionRequest
+        fields = ('connectionRequestId', 'groupId', 'sent')
+        read_only_fields = ('connectionRequestId', 'groupId', 'sent')
