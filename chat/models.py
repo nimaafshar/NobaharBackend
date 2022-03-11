@@ -1,8 +1,6 @@
 from django.db import models
 
 
-# Create your models here.
-
 class Message(models.Model):
     message = models.CharField(max_length=500, blank=False, null=False)
     sent_by = models.ForeignKey('account.User', on_delete=models.DO_NOTHING, null=False, related_name='sent_msgs')
