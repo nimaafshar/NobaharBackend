@@ -20,3 +20,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include('account.urls'))
 ]
+
+handler400 = 'account.error_handlers.bad_request'

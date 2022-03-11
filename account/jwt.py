@@ -1,7 +1,8 @@
 from rest_framework_simplejwt.serializers import TokenObtainSerializer, RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from account.models import User
-from rest_framework_simplejwt.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed
+from .error_handlers import BadRequest
 
 
 class EmailTokenObtainSerializer(TokenObtainSerializer):
@@ -14,10 +15,10 @@ class CustomTokenObtainPairSerializer(EmailTokenObtainSerializer):
         return RefreshToken.for_user(user)
 
     def validate(self, attrs):
-        # try:
-        data = super().validate(attrs)
-        # except AuthenticationFailed:
-        # raise Exception('{"error": {"enMessage": "Bad request!"}}'),400
+        try:
+            data = super().validate(attrs)
+        except AuthenticationFailed:
+            raise BadRequest()
 
         refresh = self.get_token(self.user)
 
