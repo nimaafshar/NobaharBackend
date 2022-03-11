@@ -13,7 +13,7 @@ DEFAULT_BAD_REQUEST_RESPONSE = {
 def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
 
-    if response and (response.status_code == 400 or response.status_code == 403):
+    if response and (response.status_code == 400 or response.status_code == 403 or response.status_code == 401):
         response.data = DEFAULT_BAD_REQUEST_RESPONSE
         response.status_code = 400
     return response

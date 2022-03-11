@@ -6,6 +6,7 @@ from account.models import User
 from .serializers import *
 from .models import *
 from django.db.models import Q
+from account.error_handlers import BadRequest
 
 
 class ChatsList(generics.GenericAPIView):
@@ -40,9 +41,24 @@ class Chat(generics.GenericAPIView):
         otherid = user_id
         user = request.user
         other = User.objects.get(id=otherid)
-        messages = Message.objects.filter(Q(sent_by=user, sent_to=other) | Q(sent_by=other, sent_to=user)).order_by('date')
+        messages = Message.objects.filter(Q(sent_by=user, sent_to=other) | Q(sent_by=other, sent_to=user)).order_by(
+            'date')
         res = {"messages": []}
         for message in messages:
             res['messages'].insert(0, {"message": message.message, "date": message.date, "sentby": message.sent_by.id})
 
         return Response(res)
+
+    def post(self, request, user_id, *args, **kwargs):
+        other_id = user_id
+        user = request.user
+        other = User.objects.get(id=other_id)
+        if not user.can_chat_to(other):
+            raise BadRequest()
+
+        message_text = request.data.get('message')
+        if not message_text:
+            raise BadRequest()
+
+        Message.objects.create(message=message_text, sent_by=user, sent_to=other)
+        return Response({"message": "successfull"})

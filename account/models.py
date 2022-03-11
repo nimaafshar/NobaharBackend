@@ -41,6 +41,9 @@ class User(AbstractUser):
     def is_admin(self):
         return self.group and self.group.admin_id == self.id
 
+    def can_chat_to(self, another):
+        return self.group == another.group or self.group.connected_to.filter(id=another.group.id).exists()
+
 
 class JoinRequest(models.Model):
     id = models.AutoField(primary_key=True)
