@@ -10,3 +10,11 @@ class UserGroupPermissions(BasePermission):
             return request.user.has_group
         else:
             return True
+
+
+class UserJoinRequestPermissions(BasePermission):
+    def has_permission(self, request, view):
+        if view.action == 'group_requests':
+            return request.user.is_admin
+        else:
+            return True

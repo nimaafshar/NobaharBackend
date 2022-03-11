@@ -1,13 +1,13 @@
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.permissions import IsAuthenticated
 from .serializers import GroupReadCompactSerializer, RegisterSerializer, GroupCreateSerializer, \
-    GroupReadDetailedSerializer
-from .models import Group
+    GroupReadDetailedSerializer, JoinRequestReadSerializer
+from .models import Group, JoinRequest
 from rest_framework import generics
 from rest_framework.response import Response
 from .jwt import CustomTokenObtainPairSerializer
-from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin
-from .permissions import UserGroupPermissions
+from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, ListModelMixin
+from .permissions import UserGroupPermissions, UserJoinRequestPermissions
 from rest_framework.decorators import action
 from rest_framework import status
 
@@ -64,3 +64,28 @@ class RegisterApi(generics.GenericAPIView):
             "token": str(CustomTokenObtainPairSerializer.get_token(user)),
             "message": "successful"
         })
+
+
+class JoinRequestsViewSet(GenericViewSet):
+    permission_classes = (IsAuthenticated, UserJoinRequestPermissions)
+    action_serializers = {
+        'list': JoinRequestReadSerializer,
+        'group_requests': JoinRequestReadSerializer
+    }
+
+    def get_serializer_class(self):
+        if hasattr(self, 'action_serializers'):
+            return self.action_serializers.get(self.action)
+        else:
+            return None
+
+    def list(self, request, *args, **kwargs):
+        queryset = request.user.join_requests
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({'joinRequests': serializer.data})
+
+    @action(detail=False, url_path='group', url_name='group_requests', methods=['GET'])
+    def group_requests(self, request):
+        queryset = request.user.group.join_requests
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({'joinRequests': serializer.data})

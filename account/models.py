@@ -37,12 +37,19 @@ class User(AbstractUser):
     def has_group(self):
         return self.group is not None
 
+    @property
+    def is_admin(self):
+        return self.group and self.group.admin_id == self.id
+
 
 class JoinRequest(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey('account.User', on_delete=models.CASCADE, related_name='join_requests')
     group = models.ForeignKey('account.Group', on_delete=models.CASCADE, related_name='join_requests')
     date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ('-date',)
 
 
 class ConnectionRequest(models.Model):

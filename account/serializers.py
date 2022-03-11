@@ -1,5 +1,8 @@
 from rest_framework import serializers
-from .models import Group, User
+from .models import Group, User, JoinRequest
+import datetime
+import time
+from django.utils import timezone
 
 
 class GroupReadCompactSerializer(serializers.ModelSerializer):
@@ -70,3 +73,18 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = '__all__'
+
+
+class TimestampField(serializers.Field):
+    def to_representation(self, value):
+        return int(time.mktime(value.timetuple()))
+
+
+class JoinRequestReadSerializer(serializers.ModelSerializer):
+    groupId = serializers.IntegerField(source='group_id', read_only=True)
+    userId = serializers.IntegerField(source='user_id', read_only=True)
+    date = TimestampField()
+
+    class Meta:
+        model = JoinRequest
+        fields = ('id', 'groupId', 'userId', 'date')
