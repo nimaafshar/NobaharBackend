@@ -36,7 +36,7 @@ class UserInGroupReadSerializer(serializers.ModelSerializer):
         if self.context['owner'].id == instance.id:
             return "Owner"
         else:
-            return "Member"
+            return "normal"
 
 
 class GroupReadDetailedSerializer(serializers.ModelSerializer):
