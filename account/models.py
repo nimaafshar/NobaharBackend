@@ -5,10 +5,14 @@ from django.utils.translation import gettext_lazy as _
 
 class Group(models.Model):
     id = models.AutoField(primary_key=True)
-    admin = models.OneToOneField('account.User', on_delete=models.PROTECT, related_name='owned_group', null=False)
+    admin = models.OneToOneField('account.User', on_delete=models.DO_NOTHING, related_name='owned_group', null=False)
     name = models.CharField(max_length=300, blank=False, null=False)
     description = models.TextField(null=False, blank=True)
     connected_to = models.ManyToManyField('account.Group', blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, blank=True)
+
+    class Meta:
+        ordering = ('-created_at',)
 
     def __str__(self):
         return self.name
@@ -19,9 +23,6 @@ class Group(models.Model):
 
 # Create your models here.
 class User(AbstractUser):
-    """
-    todo : use email as sign in key
-    """
     email = models.EmailField(_('email address'), blank=False, null=False, unique=True)
     name = models.CharField(max_length=200, blank=False, null=False, unique=False)
     group = models.ForeignKey('account.Group', on_delete=models.PROTECT, related_name='members', null=True)
@@ -31,6 +32,10 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
+
+    @property
+    def has_group(self):
+        return self.group is not None
 
 
 class JoinRequest(models.Model):

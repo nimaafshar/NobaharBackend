@@ -1,18 +1,22 @@
-<<<<<<< HEAD
 from rest_framework.viewsets import GenericViewSet
-from rest_framework.mixins import ListModelMixin
-from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .serializers import GroupReadCompactSerializer
+from .serializers import GroupReadCompactSerializer, RegisterSerializer, GroupCreateSerializer
 from .models import Group
+from rest_framework import generics
+from rest_framework.response import Response
+from .jwt import CustomTokenObtainPairSerializer
+from rest_framework.mixins import CreateModelMixin
+from .permissions import UserGroupPermissions
+from rest_framework import status
 
 
 # Create your views here.
 class GroupsViewSet(GenericViewSet):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, UserGroupPermissions)
     queryset = Group.objects.all()
     action_serializers = {
-        'list': GroupReadCompactSerializer
+        'list': GroupReadCompactSerializer,
+        'create': GroupCreateSerializer
     }
 
     def get_serializer_class(self):
@@ -25,11 +29,18 @@ class GroupsViewSet(GenericViewSet):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
         return Response({'groups': serializer.data})
-=======
-from rest_framework import generics
-from rest_framework.response import Response
-from .serializers import RegisterSerializer
-from .jwt import CustomTokenObtainPairSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response({'group': serializer.data, 'message': 'successfull'})
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        owner = self.request.user
+        owner.group = instance
+        owner.save()
 
 
 class RegisterApi(generics.GenericAPIView):
@@ -44,4 +55,3 @@ class RegisterApi(generics.GenericAPIView):
             "token": str(CustomTokenObtainPairSerializer.get_token(user)),
             "message": "successful"
         })
->>>>>>> 89a532b9d9b67403509a4c3b05482947ca7a014c

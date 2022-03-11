@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Group,User
+from .models import Group, User
 
 
 class GroupReadCompactSerializer(serializers.ModelSerializer):
@@ -7,6 +7,22 @@ class GroupReadCompactSerializer(serializers.ModelSerializer):
         model = Group
         fields = ('id', 'name', 'description')
         read_only_fields = ('id', 'name', 'description')
+
+
+class GroupCreateSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = Group
+        fields = ('id', 'name', 'description')
+        read_only_fields = ('id',)
+        extra_kwargs = {
+            'name': {'write_only': True},
+            'description': {'write_only': True},
+        }
+
+    def create(self, validated_data):
+        return Group.objects.create(**validated_data, admin=self.context['request'].user)
 
 
 class RegisterSerializer(serializers.ModelSerializer):
