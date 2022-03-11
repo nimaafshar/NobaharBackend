@@ -1,7 +1,7 @@
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.permissions import IsAuthenticated
 from .serializers import GroupReadCompactSerializer, RegisterSerializer, GroupCreateSerializer, \
-    GroupReadDetailedSerializer, JoinRequestReadSerializer, JoinRequestCreateSerializer
+    GroupReadDetailedSerializer, JoinRequestReadSerializer, JoinRequestCreateSerializer, AcceptRequestSerializer
 from .models import Group, JoinRequest
 from rest_framework import generics
 from rest_framework.response import Response
@@ -72,7 +72,8 @@ class JoinRequestsViewSet(GenericViewSet, CreateModelMixin):
     action_serializers = {
         'list': JoinRequestReadSerializer,
         'group_requests': JoinRequestReadSerializer,
-        'create': JoinRequestCreateSerializer
+        'create': JoinRequestCreateSerializer,
+        'accept_request': AcceptRequestSerializer
     }
 
     def get_serializer_class(self):
@@ -100,3 +101,10 @@ class JoinRequestsViewSet(GenericViewSet, CreateModelMixin):
         queryset = request.user.group.join_requests
         serializer = self.get_serializer(queryset, many=True)
         return Response({'joinRequests': serializer.data})
+
+    @action(detail=False, url_path='accept', url_name='accept_request', methods=['POST'])
+    def accept_request(self, request):
+        serializer = self.get_serializer(data=request.data, context={'user': request.user})
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response({"message": "successfull"}, status=status.HTTP_200_OK)

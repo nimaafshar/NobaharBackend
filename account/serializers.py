@@ -101,3 +101,26 @@ class JoinRequestCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return JoinRequest.objects.create(**validated_data, user=self.context['user'])
+
+
+class AcceptRequestSerializer(serializers.Serializer):
+    joinRequestId = serializers.PrimaryKeyRelatedField(queryset=JoinRequest.objects.all())
+
+    class Meta:
+        fields = ('joinRequestId',)
+
+    def validate(self, attrs):
+        validated_data = super().validate(attrs)
+        user = self.context['user']
+        join_request = validated_data['joinRequestId']
+        if not join_request.user.has_group and join_request.group.admin == user:
+            return validated_data
+        else:
+            raise serializers.ValidationError("not enough permissions")
+
+    def create(self, validated_data):
+        join_request = validated_data['joinRequestId']
+        user = join_request.user
+        user.group = join_request.group
+        user.save()
+        return user
