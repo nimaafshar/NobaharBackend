@@ -4,3 +4,4 @@ markdown
 django-filter
 python-dotenv==0.19.2
 psycopg2-binary==2.9.3
+djangorestframework-simplejwt==5.1.0

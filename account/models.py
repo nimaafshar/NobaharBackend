@@ -20,6 +20,7 @@ class User(AbstractUser):
     email = models.EmailField(_('email address'), blank=False, null=False, unique=True)
     name = models.CharField(max_length=200, blank=False, null=False, unique=False)
     group = models.ForeignKey('account.Group', on_delete=models.PROTECT, related_name='members', null=True)
+    has_chat = models.ManyToManyField('account.User')
 
 
 class JoinRequest(models.Model):
