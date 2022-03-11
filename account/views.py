@@ -49,7 +49,7 @@ class GroupsViewSet(GenericViewSet):
     def my_group(self, request):
         instance = request.user.group
         serializer = self.get_serializer(instance)
-        return Response(serializer.data)
+        return Response({'group': serializer.data})
 
 
 class RegisterApi(generics.GenericAPIView):
