@@ -16,5 +16,7 @@ class UserJoinRequestPermissions(BasePermission):
     def has_permission(self, request, view):
         if view.action == 'group_requests':
             return request.user.is_admin
+        if view.action == 'create':
+            return not request.user.has_group
         else:
             return True

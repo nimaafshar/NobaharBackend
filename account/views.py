@@ -1,7 +1,7 @@
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.permissions import IsAuthenticated
 from .serializers import GroupReadCompactSerializer, RegisterSerializer, GroupCreateSerializer, \
-    GroupReadDetailedSerializer, JoinRequestReadSerializer
+    GroupReadDetailedSerializer, JoinRequestReadSerializer, JoinRequestCreateSerializer
 from .models import Group, JoinRequest
 from rest_framework import generics
 from rest_framework.response import Response
@@ -10,6 +10,8 @@ from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, ListMode
 from .permissions import UserGroupPermissions, UserJoinRequestPermissions
 from rest_framework.decorators import action
 from rest_framework import status
+from django.db.utils import IntegrityError
+from .error_handlers import BadRequest
 
 
 # Create your views here.
@@ -65,11 +67,12 @@ class RegisterApi(generics.GenericAPIView):
         })
 
 
-class JoinRequestsViewSet(GenericViewSet):
+class JoinRequestsViewSet(GenericViewSet, CreateModelMixin):
     permission_classes = (IsAuthenticated, UserJoinRequestPermissions)
     action_serializers = {
         'list': JoinRequestReadSerializer,
-        'group_requests': JoinRequestReadSerializer
+        'group_requests': JoinRequestReadSerializer,
+        'create': JoinRequestCreateSerializer
     }
 
     def get_serializer_class(self):
@@ -82,6 +85,15 @@ class JoinRequestsViewSet(GenericViewSet):
         queryset = request.user.join_requests
         serializer = self.get_serializer(queryset, many=True)
         return Response({'joinRequests': serializer.data})
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data, context={'user': request.user})
+        serializer.is_valid(raise_exception=True)
+        try:
+            self.perform_create(serializer)
+        except IntegrityError:
+            raise BadRequest()
+        return Response({"message": "successfull"}, status=status.HTTP_200_OK)
 
     @action(detail=False, url_path='group', url_name='group_requests', methods=['GET'])
     def group_requests(self, request):

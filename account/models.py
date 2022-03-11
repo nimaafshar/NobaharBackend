@@ -50,6 +50,13 @@ class JoinRequest(models.Model):
 
     class Meta:
         ordering = ('-date',)
+        unique_together = ('user', 'group',)
+
+    def __str__(self):
+        return f'{self.user.email} -> {self.group.name}'
+
+    def __repr__(self):
+        return f'{self.user.email} -> {self.group.name}'
 
 
 class ConnectionRequest(models.Model):

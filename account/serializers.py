@@ -90,3 +90,14 @@ class JoinRequestReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = JoinRequest
         fields = ('id', 'groupId', 'userId', 'date')
+
+
+class JoinRequestCreateSerializer(serializers.ModelSerializer):
+    groupId = serializers.PrimaryKeyRelatedField(queryset=Group.objects.all(), source='group')
+
+    class Meta:
+        model = JoinRequest
+        fields = ('groupId',)
+
+    def create(self, validated_data):
+        return JoinRequest.objects.create(**validated_data, user=self.context['user'])
