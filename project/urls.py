@@ -18,7 +18,8 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/v1/', include('account.urls'))
+    path('api/v1/', include('account.urls')),
+    path('api/v1/', include('chat.urls'))
 ]
 
 handler400 = 'account.error_handlers.bad_request'
