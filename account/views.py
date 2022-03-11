@@ -59,7 +59,6 @@ class RegisterApi(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        print(user)
         return Response({
             "token": str(CustomTokenObtainPairSerializer.get_token(user)),
             "message": "successful"
