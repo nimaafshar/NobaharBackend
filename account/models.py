@@ -64,3 +64,13 @@ class ConnectionRequest(models.Model):
     from_group = models.ForeignKey('account.Group', on_delete=models.CASCADE, related_name="sent_con_reqs")
     to_group = models.ForeignKey('account.Group', on_delete=models.CASCADE, related_name="rec_con_reqs")
     sent = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ('-sent',)
+        unique_together = ('from_group', 'to_group',)
+
+    def __str__(self):
+        return f'{self.from_group.name} -> {self.to_group.name}'
+
+    def __repr__(self):
+        return f'{self.from_group.name} -> {self.to_group.name}'

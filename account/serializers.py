@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Group, User, JoinRequest
+from .models import Group, User, JoinRequest, ConnectionRequest
 import datetime
 import time
 from django.utils import timezone
@@ -124,3 +124,26 @@ class AcceptRequestSerializer(serializers.Serializer):
         user.group = join_request.group
         user.save()
         return user
+
+
+class ConnectionRequestCreateSerializer(serializers.ModelSerializer):
+    groupId = serializers.PrimaryKeyRelatedField(queryset=Group.objects.all(), source='to_group')
+
+    class Meta:
+        model = ConnectionRequest
+        fields = ('groupId',)
+        extra_kwargs = {
+            'groupId': {'write_only': True},
+        }
+
+    def validate(self, attrs):
+        validated_data = super().validate(attrs)
+        to_group = validated_data['to_group']
+        from_group = self.context['user'].group
+        if from_group == to_group:
+            raise serializers.ValidationError()
+        else:
+            return validated_data
+
+    def create(self, validated_data):
+        return ConnectionRequest.objects.create(**validated_data, from_group=self.context['user'].group)
