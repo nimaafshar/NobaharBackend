@@ -26,7 +26,7 @@ class UserJoinRequestPermissions(BasePermission):
 
 class UserConnectionRequestPermissions(BasePermission):
     def has_permission(self, request, view):
-        if view.action == 'create' or view.action == 'list':
+        if view.action == 'create' or view.action == 'list' or view.action == 'accept_request':
             return request.user.is_admin
         else:
             return True

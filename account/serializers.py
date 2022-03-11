@@ -158,3 +158,38 @@ class ConnectionRequestReadSerializer(serializers.ModelSerializer):
         model = ConnectionRequest
         fields = ('connectionRequestId', 'groupId', 'sent')
         read_only_fields = ('connectionRequestId', 'groupId', 'sent')
+
+
+class AcceptConnectionRequestSerializer(serializers.Serializer):
+    groupId = serializers.PrimaryKeyRelatedField(queryset=Group.objects.all())
+
+    class Meta:
+        fields = ('groupId',)
+
+    def validate(self, attrs):
+        validated_data = super().validate(attrs)
+        user = self.context['user']
+        print(user)
+        to_group = user.group
+        print(to_group)
+        from_group = validated_data['groupId']
+        print(from_group)
+        try:
+            ConnectionRequest.objects.get(to_group=to_group, from_group=from_group)
+        except ConnectionRequest.DoesNotExist:
+            print("1")
+            raise serializers.ValidationError("does not exist")
+
+        if to_group.connected_to.filter(id=from_group.id).exists():
+            print("2")
+            raise serializers.ValidationError("already exist")
+
+        return validated_data
+
+    def create(self, validated_data):
+        user = self.context['user']
+        to_group = user.group
+        from_group = validated_data['groupId']
+        to_group.connected_to.add(from_group)
+        from_group.connected_to.add(to_group)
+        return from_group

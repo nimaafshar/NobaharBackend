@@ -2,7 +2,7 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework.permissions import IsAuthenticated
 from .serializers import GroupReadCompactSerializer, RegisterSerializer, GroupCreateSerializer, \
     GroupReadDetailedSerializer, JoinRequestReadSerializer, JoinRequestCreateSerializer, AcceptRequestSerializer, \
-    ConnectionRequestCreateSerializer, ConnectionRequestReadSerializer
+    ConnectionRequestCreateSerializer, ConnectionRequestReadSerializer,AcceptConnectionRequestSerializer
 from .models import Group, JoinRequest
 from rest_framework import generics
 from rest_framework.response import Response
@@ -111,13 +111,13 @@ class JoinRequestsViewSet(GenericViewSet, CreateModelMixin):
         return Response({"message": "successfull"}, status=status.HTTP_200_OK)
 
 
-class ConnectionRequestsViewSet(GenericViewSet):
+class ConnectionRequestsViewSet(GenericViewSet, CreateModelMixin):
     permission_classes = (IsAuthenticated, UserConnectionRequestPermissions)
     action_serializers = {
         'list': ConnectionRequestReadSerializer,
         # 'group_requests': JoinRequestReadSerializer,
         'create': ConnectionRequestCreateSerializer,
-        # 'accept_request': AcceptRequestSerializer
+        'accept_request': AcceptConnectionRequestSerializer
     }
 
     def get_serializer_class(self):
@@ -138,4 +138,11 @@ class ConnectionRequestsViewSet(GenericViewSet):
             self.perform_create(serializer)
         except IntegrityError:
             raise BadRequest()
+        return Response({"message": "successfull"}, status=status.HTTP_200_OK)
+
+    @action(detail=False, url_path='accept', url_name='accept_request', methods=['POST'])
+    def accept_request(self, request):
+        serializer = self.get_serializer(data=request.data, context={'user': request.user})
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
         return Response({"message": "successfull"}, status=status.HTTP_200_OK)
