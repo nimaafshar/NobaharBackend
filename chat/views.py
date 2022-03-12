@@ -50,14 +50,19 @@ class Chat(generics.GenericAPIView):
         return Response(res)
 
     def post(self, request, user_id, *args, **kwargs):
+        print("salam")
         other_id = user_id
         user = request.user
+        print(user)
         other = User.objects.get(id=other_id)
+        print(other)
         if not user.can_chat_to(other):
+            print("1")
             raise BadRequest()
 
         message_text = request.data.get('message')
         if not message_text:
+            print("2")
             raise BadRequest()
 
         Message.objects.create(message=message_text, sent_by=user, sent_to=other)
